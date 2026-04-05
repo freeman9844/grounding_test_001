@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import argparse
 import urllib.parse
 from datetime import datetime, timedelta
 
@@ -13,19 +14,31 @@ except ImportError:
     sys.exit(1)
 
 def main():
+    # 명령줄 인수 파싱 (동적 변수 처리)
+    parser = argparse.ArgumentParser(description="Vertex AI Google Search Grounding Test")
+    parser.add_argument("-q", "--query", type=str, default="삼성전자 최신 소식 알려줘", help="검색할 주제 또는 질문 (예: '엔비디아 주가 동향')")
+    parser.add_argument("-d", "--days", type=int, default=3, help="며칠 전까지의 정보를 최신으로 볼 것인지 기준 일수 (기본값: 3)")
+    args = parser.parse_args()
+
+    user_topic = args.query
+    days_ago = args.days
+
     # 설정 정보
     PROJECT_ID = "jwlee-argolis-202104"
     LOCATION = "global"  # Vertex AI는 리전(Region) 설정이 필요합니다. 기본값으로 global 사용.
 
-    # 1. 3일 전 날짜 계산 (YYYY-MM-DD 형식)
-    three_days_ago = datetime.now() - timedelta(days=3)
-    date_str = three_days_ago.strftime("%Y-%m-%d")
+    # 1. 동적 날짜 계산 (YYYY-MM-DD 형식)
+    target_date = datetime.now() - timedelta(days=days_ago)
+    date_str = target_date.strftime("%Y-%m-%d")
 
-    # 2. 프롬프트 구성 (after: 연산자 포함)
-    query = f"삼성전자 최신 소식 알려줘 after:{date_str}"
+    # 2. 프롬프트 구성 (after: 연산자 동적 포함)
+    query = f"{user_topic} after:{date_str}"
+    
     print(f"==================================================")
-    print(f"🚀 테스트 시작: Vertex AI - Grounding with Google Search")
+    print(f"🚀 테스트 시작: Vertex AI - Grounding (동적 변수 적용)")
     print(f"✅ 프로젝트: {PROJECT_ID} ({LOCATION})")
+    print(f"✅ 검색 주제: {user_topic}")
+    print(f"✅ 최신성 기준: 최근 {days_ago}일 이내 (기준일: {date_str})")
     print(f"==================================================")
     print(f"생성된 프롬프트: {query}\n")
 

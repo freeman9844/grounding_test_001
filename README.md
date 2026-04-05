@@ -31,8 +31,15 @@ pip install google-genai google-auth
 ## 💡 실행 방법
 
 **Vertex AI 테스트:**
+
+스크립트 실행 시 `--query` (또는 `-q`) 와 `--days` (또는 `-d`) 옵션을 통해 동적으로 검색어와 최신성 기준(며칠 전)을 설정할 수 있습니다.
+
 ```bash
+# 기본 실행 (삼성전자, 최근 3일)
 python3 run_grounding_test.py
+
+# 커스텀 실행 (예: 엔비디아 주가, 최근 1일)
+python3 run_grounding_test.py -q "엔비디아 주가 동향" -d 1
 ```
 
 ## 🔍 출력 결과 (메타데이터 로깅)
