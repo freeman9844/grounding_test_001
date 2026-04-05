@@ -1,0 +1,13 @@
+# Environments
+test_env/
+venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# OS
+.DS_Store
