@@ -4,19 +4,14 @@
 
 ## 📌 주요 파일 설명
 
-이 저장소에는 두 가지 환경(Vertex AI, AI Studio)에 맞춘 테스트 스크립트가 포함되어 있습니다.
+이 저장소는 Google Cloud의 Vertex AI 환경에 맞춘 테스트 스크립트를 포함합니다.
 
-### 1. `run_grounding_test.py` (Vertex AI 전용)
+### `run_grounding_test.py` (Vertex AI 전용)
 * **목적:** Google Cloud의 Vertex AI 엔드포인트를 사용하여 최신 검색 결과를 가져옵니다.
 * **핵심 원리:** Vertex AI 백엔드는 현재 SDK 상에서 직접적인 시간 필터(`time_range_filter`)를 지원하지 않습니다. 이를 극복하기 위해 **시스템 인스트럭션(System Instruction)**을 사용하여 모델이 자체적으로 검색 쿼리를 생성할 때 `after:YYYY-MM-DD` 연산자를 무조건 포함하도록 강제합니다.
 * **인증:** Google Cloud ADC (`gcloud auth application-default login`)가 필요합니다.
 
-### 2. `search_grounding_test.py` (Google AI Studio 전용)
-* **목적:** 일반 Gemini API(AI Studio) 환경에서 최신 검색 결과를 가져옵니다.
-* **핵심 원리:** AI Studio 환경에서는 SDK가 제공하는 `time_range_filter` 파라미터를 사용하여 `types.Interval` 객체로 직접 검색 기간을 제한할 수 있습니다.
-* **인증:** `GEMINI_API_KEY` 환경변수가 필요합니다.
-
-### 3. `run_test.sh`
+### `run_test.sh`
 * 테스트 스크립트를 간편하게 실행하기 위한 쉘 스크립트입니다.
 
 ## 🚀 요구 사항 (Requirements)
@@ -32,14 +27,51 @@ pip install google-genai google-auth
 python3 run_grounding_test.py
 ```
 
-**AI Studio 테스트:**
-```bash
-export GEMINI_API_KEY="your_api_key"
-python3 search_grounding_test.py
-```
-
 ## 🔍 출력 결과 (메타데이터 로깅)
 
-두 스크립트 모두 단순히 LLM의 답변만 출력하는 것이 아니라, 응답에 포함된 **Grounding Metadata**를 파싱하여 아래 정보를 로깅합니다.
+이 스크립트는 단순히 LLM의 답변만 출력하는 것이 아니라, 응답에 포함된 **Grounding Metadata**를 파싱하여 아래 정보를 로깅합니다.
 1. 모델이 실제로 검색 엔진에 질의한 쿼리 원문 (예: `['삼성전자 최신 소식 after:2026-04-02']`)
 2. 검색 결과로 참조한 실제 웹 문서(Chunks)의 제목과 URL 링크
+
+## 📝 실행 샘플 (Sample Output)
+
+```text
+==================================================
+🚀 테스트 시작: Vertex AI - Grounding with Google Search
+✅ 프로젝트: jwlee-argolis-202104 (global)
+==================================================
+생성된 프롬프트: 삼성전자 최신 소식 알려줘 after:2026-04-02
+
+[gemini-3.1-flash-lite-preview] 모델에 요청을 보내는 중 (약간의 시간이 소요될 수 있습니다)...
+
+==================================================
+✨ [최종 응답 결과]
+==================================================
+2026년 4월 2일 이후 확인된 삼성전자의 주요 소식은 다음과 같습니다.
+
+1. 1분기 잠정 실적 발표 예정 (4월 7일)
+*   삼성전자는 오는 4월 7일 2026년 1분기 잠정 실적을 발표할 예정입니다. 시장에서는 반도체 업황 개선에 힘입어 삼성전자가 매우 강력한 실적을 기록할 것으로 기대하고 있습니다.
+
+2. DS부문 '2026년 상생협력 DAY' 개최 (4월 3일)
+*   삼성전자 DS(반도체)부문은 협력회사와의 동반 성장을 도모하기 위해 '2026년 상생협력 DAY'를 개최했습니다. 
+
+요약하자면, 삼성전자는 현재 반도체 부문의 호황을 바탕으로 1분기 사상 최대 수준의 실적 발표를 앞두고 있으며, 협력사와의 상생 경영을 강화하는 한편 AI 인프라 시장에서의 주도권 확보를 위한 대규모 투자를 지속하고 있습니다.
+==================================================
+
+==================================================
+🔍 [내부 검색 로그 (Grounding Metadata)]
+==================================================
+1. 사용된 Google 검색어 (webSearchQueries):
+   원본 리스트: ['삼성전자 최신 소식 after:2026-04-02']
+
+   💡 [UI 디스플레이 규정 시뮬레이션: Search Suggestion 칩]
+   (사용자가 직접 클릭하여 Google 검색 결과를 확인할 수 있도록 제공해야 함)
+   [1] 검색어: '삼성전자 최신 소식 after:2026-04-02'
+       👉 Google 검색 결과 확인: https://www.google.com/search?q=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90%20%EC%B5%9C%EC%8B%A0%20%EC%86%8C%EC%8B%9D%20after%3A2026-04-02
+
+2. 검색해서 읽어온 문서(Chunks) 목록:
+   [1] choicenews.co.kr
+       URL: https://vertexaisearch.cloud.google.com/grounding-api-redirect/...
+   [2] dt.co.kr
+       URL: https://vertexaisearch.cloud.google.com/grounding-api-redirect/...
+```
